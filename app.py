@@ -1,11 +1,23 @@
-from flask import Flask, url_for
-from flask import Flask, flash, redirect, render_template, request, session, abort
-import os
+from flask import Flask, flash, redirect, render_template, request, session, abort, url_for
+from functools import wraps
 
 
 #  the below code creates an instance of the app
 
 app = Flask(__name__)
+
+app.secret_key = 'littlesecret'
+
+# login required decorator
+def login_required(f):
+    @wraps(f)
+    def wrap(*args, **kwargs):
+        if 'logged_in' in session:
+            return f(*args, **kwargs)
+        else:
+            flash('You need to login first.')
+            return redirect(url_for('login'))
+    return wrap
 
 # these are the routes which set out what each page on the webapp will do
 @app.route('/')
@@ -13,22 +25,23 @@ def home():
     if not session.get('logged_in'):
         return render_template('login.html')
     else:
-        return "Did it work???"
-
-#
-# @app.route("/login")
-# def login():
-#     return render_template("login.html")
+        return
 
 
-@app.route('/login', methods=['GET','POST'])
-def do_admin_login():
-    if request.form['password'] == 'password' and request.form['username'] == 'admin':
-        # session['logged_in'] = True
-        return redirect(url_for('welcome'))
-    else:
-        flash('wrong password!')
-        return home()
+
+# @app.route('/login', methods=['GET','POST'])
+# def do_admin_login():
+#     if request.form['password'] == 'password' and request.form['username'] == 'admin':
+#         session['logged_in'] = True
+#         return redirect(url_for('welcome'))
+#     else:
+#         flash('wrong password!')
+#         return home()
+
+@app.route("/home")
+def home_page():
+    session['attempt'] = 1
+    return render_template("login.html")
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -50,13 +63,13 @@ def login():
         else:
             session['logged_in'] = True
             flash('You were logged in.')
-            return redirect(url_for('home'))
+            return redirect(url_for('welcome'))
     return render_template('login.html', error=error)
 
 @app.route("/logout")
 def logout():
     session['logged_in'] = False
-    return home()
+    return redirect(url_for('home'))
 
 @app.route("/welcome")
 def welcome():
@@ -64,5 +77,5 @@ def welcome():
 
 
 if __name__ == "__main__":
-    app.secret_key = os.urandom(12)
-    app.run(debug=True, host='0.0.0.0', port=4000)
+    # app.secret_key = os.urandom(12)
+    app.run(debug=True) #, host='0.0.0.0', port=4000)
