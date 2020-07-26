@@ -19,29 +19,13 @@ def login_required(f):
             return redirect(url_for('login'))
     return wrap
 
-# these are the routes which set out what each page on the webapp will do
-@app.route('/')
-def home():
-    if not session.get('logged_in'):
-        return render_template('login.html')
-    else:
-        return
-
-
-
-# @app.route('/login', methods=['GET','POST'])
-# def do_admin_login():
-#     if request.form['password'] == 'password' and request.form['username'] == 'admin':
-#         session['logged_in'] = True
-#         return redirect(url_for('welcome'))
-#     else:
-#         flash('wrong password!')
-#         return home()
-
-@app.route("/home")
+@app.route("/", methods=['GET'])
+@login_required
 def home_page():
     session['attempt'] = 1
-    return render_template("login.html")
+    return render_template("login.html") # change to welcome
+
+
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
