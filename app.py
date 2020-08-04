@@ -59,6 +59,9 @@ def logout():
 def welcome():
     return render_template("welcome.html")
 
+@app.route("/about")
+def about():
+    return render_template("aboutme.html")
 
 if __name__ == "__main__":
     # app.secret_key = os.urandom(12)
